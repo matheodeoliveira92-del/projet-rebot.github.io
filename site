@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robot suiveur de ligne - SAE GEII</title>
+
+  <style>
+    :root {
+      --fond-principal: #0b1220;
+      --fond-secondaire: #13233f;
+      --carte: rgba(255, 255, 255, 0.08);
+      --bordure: rgba(255, 255, 255, 0.14);
+      --texte: #f8fafc;
+      --texte-secondaire: #cbd5e1;
+      --jaune: #facc15;
+      --bleu: #38bdf8;
+      --vert: #22c55e;
+      --rayon: 22px;
+      --ombre: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--texte);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.16), transparent 24%),
+        radial-gradient(circle at bottom right, rgba(250, 204, 21, 0.10), transparent 24%),
+        linear-gradient(160deg, var(--fond-principal) 0%, var(--fond-secondaire) 100%);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1150px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(6, 12, 24, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .navbar {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      padding: 14px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .icone-logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--jaune), #fff1a6);
+      color: #111827;
+      box-shadow: var(--ombre);
+      font-size: 1.3rem;
+    }
+
+    .liens-navigation {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .bouton-navigation {
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--texte-secondaire);
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .bouton-navigation:hover,
+    .bouton-navigation.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.14);
+    }
+
+    main {
+      padding: 32px 0 50px;
+    }
+
+    .page {
+      display: none;
+      animation: apparition 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes apparition {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .carte,
+    .bloc {
+      background: var(--carte);
+      border: 1px solid var(--bordure);
+      border-radius: var(--rayon);
+      box-shadow: var(--ombre);
+    }
+
+    .bloc {
+      padding: 24px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .texte-hero {
+      padding: 40px;
+    }
+
+    .badge,
+    .etiquette {
+      display: inline-block;
+      margin-bottom: 16px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    .badge {
+      background: rgba(250, 204, 21, 0.12);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+      color: #fde68a;
+    }
+
+    .etiquette {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.24);
+      color: #bae6fd;
+      font-size: 0.92rem;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4vw, 3.7rem);
+      line-height: 1.1;
+      margin: 0 0 18px;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3vw, 2.4rem);
+      margin: 0 0 14px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 1.12rem;
+    }
+
+    p,
+    li {
+      color: var(--texte-secondaire);
+      line-height: 1.65;
+    }
+
+    p {
+      margin: 0;
+    }
+
+    ul {
+      margin-top: 8px;
+      padding-left: 20px;
+    }
+
+    a {
+      color: #fde68a;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+
+    .bouton {
+      border: none;
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    .bouton-principal {
+      background: linear-gradient(135deg, var(--jaune), #fde047);
+      color: #111827;
+    }
+
+    .bouton-secondaire {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .bouton:hover {
+      transform: translateY(-2px);
+    }
+
+    .zone-robot {
+      min-height: 360px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+
+    .piste {
+      position: absolute;
+      width: 130%;
+      height: 220px;
+      border: 18px solid rgba(255, 255, 255, 0.9);
+      border-color: transparent transparent transparent rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      left: -16%;
+      top: 42%;
+      transform: rotate(12deg);
+      opacity: 0.16;
+    }
+
+    .robot-dessin {
+      width: 290px;
+      height: 180px;
+      position: relative;
+      transform: rotate(-4deg);
+    }
+
+    .haut-robot,
+    .bas-robot {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #1f2937, #334155);
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+    }
+
+    .haut-robot {
+      top: 24px;
+      width: 180px;
+      height: 68px;
+    }
+
+    .bas-robot {
+      top: 82px;
+      width: 220px;
+      height: 54px;
+    }
+
+    .oeil {
+      position: absolute;
+      top: 40px;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #93c5fd, #1d4ed8 65%, #0f172a 66%);
+      border: 4px solid #cbd5e1;
+    }
+
+    .oeil.gauche {
+      left: 82px;
+    }
+
+    .oeil.droit {
+      right: 82px;
+    }
+
+    .roue {
+      position: absolute;
+      top: 92px;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #475569 35%, #0f172a 36% 65%, #facc15 66%);
+    }
+
+    .roue.gauche {
+      left: 18px;
+    }
+
+    .roue.droite {
+      right: 18px;
+    }
+
+    .capteurs-dessin {
+      position: absolute;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .capteurs-dessin span {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0f172a, #475569);
+      border: 2px solid #cbd5e1;
+    }
+
+    .grille-2,
+    .grille-3,
+    .grille-4 {
+      display: grid;
+      gap: 20px;
+    }
+
+    .grille-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grille-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .grille-4 {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .image-equipement {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .bloc-code {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 18px;
+      overflow-x: auto;
+      color: #e5e7eb;
+      font-size: 0.95rem;
+      line-height: 1.55;
+    }
+
+    .zone-video {
+      min-height: 240px;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.25);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.42);
+    }
+
+    .humour {
+      border-color: rgba(250, 204, 21, 0.35);
+      background: rgba(250, 204, 21, 0.08);
+    }
+
+    footer {
+      padding: 28px 0 36px;
+      text-align: center;
+      color: var(--texte-secondaire);
+    }
+
+    @media (max-width: 980px) {
+      .hero,
+      .grille-4,
+      .grille-3,
+      .grille-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .grille-4,
+      .grille-3,
+      .grille-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .texte-hero {
+        padding: 28px;
+      }
+
+      .navbar {
+        justify-content: center;
+      }
+
+      .logo {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .liens-navigation {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container navbar">
+      <div class="logo">
+        <div class="icone-logo">🤖</div>
+        <span>LineBot SAE</span>
+      </div>
+
+      <nav class="liens-navigation">
+        <button class="bouton-navigation active" data-page="accueil">Accueil</button>
+        <button class="bouton-navigation" data-page="equipe">Équipe</button>
+        <button class="bouton-navigation" data-page="robot">Robot</button>
+        <button class="bouton-navigation" data-page="epreuves">Épreuves</button>
+        <button class="bouton-navigation" data-page="programmation">Programmation</button>
+        <button class="bouton-navigation" data-page="videos">Vidéos</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="page active" id="accueil">
+      <div class="hero">
+        <div class="carte texte-hero">
+          <div class="badge">SAE Robotique - GEII 1</div>
+          <h1>Robot suiveur de ligne</h1>
+          <p>
+            Bienvenue sur le site de présentation de notre robot autonome. Son objectif est de suivre une ligne noire
+            sur un fond clair grâce à des capteurs et à une carte ESP32. Simple à dire, un peu moins simple à réussir
+            quand le robot décide de visiter la salle tout seul.
+          </p>
+
+          <div class="actions">
+            <button class="bouton bouton-principal" data-link="robot">Découvrir le robot</button>
+            <button class="bouton bouton-secondaire" data-link="programmation">Voir la programmation</button>
+          </div>
+        </div>
+
+        <div class="carte zone-robot">
+          <div class="piste"></div>
+          <div class="robot-dessin">
+            <div class="haut-robot"></div>
+            <div class="bas-robot"></div>
+            <div class="oeil gauche"></div>
+            <div class="oeil droit"></div>
+            <div class="roue gauche"></div>
+            <div class="roue droite"></div>
+            <div class="capteurs-dessin">
+              <span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grille-3">
+        <article class="bloc">
+          <div class="etiquette">Objectif</div>
+          <h3>Suivre une trajectoire</h3>
+          <p>Le robot doit détecter la ligne au sol et corriger automatiquement sa direction.</p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Commande</div>
+          <h3>ESP32 et moteurs</h3>
+          <p>La carte ESP32 lit les capteurs, prend une décision et envoie une commande aux moteurs.</p>
+        </article>
+
+        <article class="bloc humour">
+          <div class="etiquette">Touche humoristique</div>
+          <h3>Robot sans permis</h3>
+          <p>Il n’a pas encore le permis B, mais il apprend déjà à rester dans sa voie.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="equipe">
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Présentation de l’équipe</h2>
+        <p>
+          Notre équipe est composée de trois étudiants de GEII 1 à l’UVSQ de Vélizy.
+          Nous avons travaillé sur la conception, le câblage, la programmation, les essais et la réalisation du site web.
+        </p>
+      </div>
+
+      <div class="grille-3">
+        <article class="bloc">
+          <div class="etiquette">Équipier 1</div>
+          <h3>Denelle Mathieu</h3>
+          <p>Participation au montage, aux tests et à l’amélioration du comportement du robot.</p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Équipier 2</div>
+          <h3>Fernandes Mathéo</h3>
+          <p>Participation à la programmation, au câblage et à la mise en forme du site web.</p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Équipier 3</div>
+          <h3>Vallée Rémy</h3>
+          <p>Participation à l’intégration des composants, aux essais et à la validation du robot.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="robot">
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Présentation du robot</h2>
+        <p>
+          Le robot suiveur de ligne est un système embarqué capable de se déplacer automatiquement en suivant une ligne noire.
+          Il utilise des capteurs placés à l’avant pour détecter la position de la ligne, puis il ajuste la vitesse de ses moteurs
+          pour rester sur la trajectoire.
+        </p>
+      </div>
+
+      <div class="grille-2" style="margin-bottom: 22px;">
+        <article class="bloc">
+          <div class="etiquette">Principe</div>
+          <h3>Capteurs → décision → moteurs</h3>
+          <p>
+            Les capteurs détectent le contraste entre la ligne noire et le fond clair. Le programme analyse ensuite si la ligne
+            est à gauche, au centre ou à droite, puis corrige la trajectoire.
+          </p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Structure</div>
+          <h3>Deux roues motrices</h3>
+          <p>
+            Le robot se déplace grâce à deux roues motrices. Une roue libre permet de stabiliser le châssis pendant les déplacements.
+          </p>
+        </article>
+      </div>
+
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Équipements utilisés</h2>
+        <p>Voici les principaux composants utilisés pour réaliser le robot.</p>
+      </div>
+
+      <div class="grille-4">
+        <article class="bloc">
+          <img class="image-equipement" src="images/capteurs.jpg" alt="Barre de capteurs de ligne">
+          <h3>Barre de capteurs</h3>
+          <p>Elle détecte la ligne noire au sol à l’aide de plusieurs capteurs analogiques.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/esp32.jpg" alt="Carte ESP32">
+          <h3>Carte ESP32</h3>
+          <p>C’est le cerveau du robot. Elle lit les capteurs et commande les moteurs.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/driver.jpg" alt="Carte de commande moteur">
+          <h3>Commande moteurs</h3>
+          <p>Elle permet de piloter les moteurs sans les brancher directement à l’ESP32.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/moteur.jpg" alt="Motoréducteur avec encodeur">
+          <h3>Motoréducteurs</h3>
+          <p>Ils entraînent les roues. Les encodeurs peuvent mesurer la rotation des roues.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/roues.jpg" alt="Roues du robot">
+          <h3>Roues</h3>
+          <p>Elles assurent le déplacement du robot sur la piste.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/roue_libre.jpg" alt="Roue libre">
+          <h3>Roue libre</h3>
+          <p>Elle stabilise le robot pendant son déplacement.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/dcdc.jpg" alt="Convertisseur DC-DC">
+          <h3>Convertisseur DC-DC</h3>
+          <p>Il adapte la tension d’alimentation pour alimenter correctement les cartes électroniques.</p>
+        </article>
+
+        <article class="bloc">
+          <img class="image-equipement" src="images/ventilateur.jpg" alt="Ventilateur">
+          <h3>Ventilateur</h3>
+          <p>Il peut aider au refroidissement du montage électronique.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="epreuves">
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Présentation des épreuves</h2>
+        <p>
+          Les épreuves permettent d’évaluer la capacité du robot à suivre une ligne, à réagir dans les virages
+          et à rester stable pendant son déplacement.
+        </p>
+      </div>
+
+      <div class="grille-3">
+        <article class="bloc">
+          <div class="etiquette">Épreuve 1</div>
+          <h3>Ligne droite</h3>
+          <p>
+            Le robot doit avancer en suivant une ligne droite. Cette épreuve permet de valider le sens des moteurs
+            et le réglage des capteurs centraux.
+          </p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Épreuve 2</div>
+          <h3>Virages</h3>
+          <p>
+            Le robot doit suivre des courbes en modifiant la vitesse du moteur gauche et du moteur droit.
+          </p>
+        </article>
+
+        <article class="bloc humour">
+          <div class="etiquette">Épreuve 3</div>
+          <h3>Stabilité</h3>
+          <p>
+            Le robot doit limiter les zigzags. L’objectif est d’éviter qu’il se comporte comme un caddie de supermarché.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="programmation">
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Explication de la programmation</h2>
+        <p>
+          Le programme est écrit pour une carte ESP32 avec l’environnement Arduino. Il lit les huit capteurs analogiques,
+          compare les valeurs à un seuil, puis commande les moteurs avec un signal PWM.
+        </p>
+      </div>
+
+      <div class="grille-2" style="margin-bottom: 22px;">
+        <article class="bloc">
+          <div class="etiquette">Lecture</div>
+          <h3>Lecture des capteurs</h3>
+          <p>
+            Chaque capteur renvoie une valeur analogique. Si la valeur dépasse le seuil, le programme considère que la ligne noire
+            est détectée.
+          </p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Décision</div>
+          <h3>Gauche, centre ou droite</h3>
+          <p>
+            Le programme compte les capteurs actifs à gauche, au centre et à droite. Selon le résultat,
+            il décide de tourner ou d’avancer tout droit.
+          </p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Commande</div>
+          <h3>Contrôle des moteurs</h3>
+          <p>
+            Pour tourner, le robot ralentit un moteur et accélère l’autre. Cette différence de vitesse permet de corriger la trajectoire.
+          </p>
+        </article>
+
+        <article class="bloc">
+          <div class="etiquette">Encodeurs</div>
+          <h3>Amélioration possible</h3>
+          <p>
+            Les encodeurs sont présents sur les moteurs, mais ils ne sont pas utilisés dans la version de base.
+            Ils pourraient servir à mesurer précisément la vitesse des roues.
+          </p>
+        </article>
+      </div>
+
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Extrait du programme</h2>
+        <pre class="bloc-code"><code>if (detectionCentre > 0) {
+  avancer(vitesseBase, vitesseBase);
+}
+else if (detectionGauche > 0) {
+  avancer(vitesseBase - correction, vitesseBase + correction);
+}
+else if (detectionDroite > 0) {
+  avancer(vitesseBase + correction, vitesseBase - correction);
+}
+else {
+  avancer(70, 70);
+}</code></pre>
+      </div>
+
+      <div class="grille-2">
+        <article class="bloc">
+          <div class="etiquette">Programme Arduino</div>
+          <h3>Lien vers le programme utilisé</h3>
+          <p>
+            Ajoutez ici le lien vers le fichier du programme :<br><br>
+            <a href="programmes/robot_suiveur_ligne.ino">Télécharger le programme Arduino</a>
+          </p>
+        </article>
+
+        <article class="bloc humour">
+          <div class="etiquette">Utilisation de l’IA</div>
+          <h3>Pourcentage d’aide IA</h3>
+          <p>
+            Pourcentage estimé de programmation assistée par IA : <strong>à compléter %</strong>.
+            Le programme final doit être compris, testé et validé par l’équipe.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="page" id="videos">
+      <div class="bloc" style="margin-bottom: 22px;">
+        <h2>Vidéos</h2>
+        <p>
+          Cette page sert à présenter les essais du robot. Vous pouvez remplacer les fichiers vidéo par vos vraies vidéos.
+        </p>
+      </div>
+
+      <div class="grille-2">
+        <article class="bloc">
+          <div class="zone-video">
+            <div>
+              <h3>Vidéo 1 : premier essai</h3>
+              <p>Insérez ici une vidéo du robot sur une ligne droite.</p>
+              <br>
+              <video controls width="100%">
+                <source src="videos/essai_1.mp4" type="video/mp4">
+                Votre navigateur ne prend pas en charge la lecture vidéo.
+              </video>
+            </div>
+          </div>
+        </article>
+
+        <article class="bloc">
+          <div class="zone-video">
+            <div>
+              <h3>Vidéo 2 : suivi de ligne</h3>
+              <p>Insérez ici une vidéo du robot sur une piste avec virages.</p>
+              <br>
+              <video controls width="100%">
+                <source src="videos/suivi_ligne.mp4" type="video/mp4">
+                Votre navigateur ne prend pas en charge la lecture vidéo.
+              </video>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Site de présentation du robot suiveur de ligne - SAE GEII 1 / UVSQ Vélizy
+    </div>
+  </footer>
+
+  <script>
+    const boutonsNavigation = document.querySelectorAll('.bouton-navigation');
+    const pages = document.querySelectorAll('.page');
+    const liensRapides = document.querySelectorAll('[data-link]');
+
+    function afficherPage(idPage) {
+      pages.forEach(page => {
+        page.classList.remove('active');
+      });
+
+      boutonsNavigation.forEach(bouton => {
+        bouton.classList.remove('active');
+      });
+
+      const pageCible = document.getElementById(idPage);
+      const boutonCible = document.querySelector(`.bouton-navigation[data-page="${idPage}"]`);
+
+      if (pageCible) {
+        pageCible.classList.add('active');
+      }
+
+      if (boutonCible) {
+        boutonCible.classList.add('active');
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    boutonsNavigation.forEach(bouton => {
+      bouton.addEventListener('click', () => {
+        afficherPage(bouton.dataset.page);
+      });
+    });
+
+    liensRapides.forEach(lien => {
+      lien.addEventListener('click', () => {
+        afficherPage(lien.dataset.link);
+      });
+    });
+  </script>
+</body>
+</html>
