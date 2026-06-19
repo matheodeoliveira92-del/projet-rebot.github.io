@@ -728,18 +728,37 @@
 
       <div class="bloc" style="margin-bottom: 22px;">
         <h2>Extrait du programme</h2>
-        <pre class="bloc-code"><code>if (detectionCentre > 0) {
-  avancer(vitesseBase, vitesseBase);
-}
-else if (detectionGauche > 0) {
-  avancer(vitesseBase - correction, vitesseBase + correction);
-}
-else if (detectionDroite > 0) {
-  avancer(vitesseBase + correction, vitesseBase - correction);
-}
-else {
-  avancer(70, 70);
+        <pre class="bloc-code"><code>void loop() {
+  lireCapteurs();        // Lecture des 8 capteurs
+  lireCommandes();       // Réglage éventuel du PID
+
+  float position = lirePosition();
+  detecterEtCompter();
+
+  // Calcul de la correction avec le PID
+  float correction = calculerPID(position);
+
+  // Adaptation de la vitesse des moteurs
+  int vitesseD = vitesseBase - round(correction);
+  int vitesseG = vitesseBase + round(correction);
+
+  definirCibles(vitesseG, vitesseD);
+
+  // Si la ligne est perdue, le robot pousse la barrière
+  if (L_perdue_50ms) {
+    PousserBarriere();
+  }
+  else {
+    regulerVitesse();
+  }
+
+  delay(2);
 }</code></pre>
+        <p style="margin-top: 18px;">
+  Cet extrait correspond à la boucle principale du robot. Le programme lit les capteurs,
+  calcule la position de la ligne, applique une correction PID, puis ajuste la vitesse
+  du moteur gauche et du moteur droit pour maintenir le robot sur la trajectoire.
+</p>
       </div>
 
       <div class="grille-2">
