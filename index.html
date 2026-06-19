@@ -532,7 +532,7 @@
       <div class="bloc" style="margin-bottom: 22px;">
         <h2>Présentation de l’équipe</h2>
         <p>
-          Notre équipe est composée de trois étudiants de GEII 1 à l’UVSQ de Vélizy.
+          Notre équipe est composée de trois étudiants de GEII 1 à l’IUT de Vélizy.
           Nous avons travaillé sur la conception, le câblage, la programmation, les essais et la réalisation du site web.
         </p>
       </div>
@@ -562,9 +562,7 @@
       <div class="bloc" style="margin-bottom: 22px;">
         <h2>Présentation du robot</h2>
         <p>
-          Le robot suiveur de ligne est un système embarqué capable de se déplacer automatiquement en suivant une ligne noire.
-          Il utilise des capteurs placés à l’avant pour détecter la position de la ligne, puis il ajuste la vitesse de ses moteurs
-          pour rester sur la trajectoire.
+          Le robot suiveur de ligne est composé de plusieurs éléments électroniques et mécaniques qui lui permettent de se déplacer de manière autonome. Des capteurs infrarouges placés à l’avant détectent les variations de couleur au sol afin d’identifier la position de la ligne. Le programme analyse ensuite les informations transmises par les capteurs, calcule l’écart entre le robot et la trajectoire à suivre, puis ajuste la vitesse des moteurs gauche et droit pour maintenir le robot sur le parcours.
         </p>
       </div>
 
@@ -602,25 +600,25 @@
         <article class="bloc">
           <img class="image-equipement" src="images/esp32.jpg" alt="Carte ESP32">
           <h3>Carte ESP32</h3>
-          <p>C’est le cerveau du robot. Elle lit les capteurs et commande les moteurs.</p>
+          <p>C’est le cerveau du robot. Elle reçoit les résultats des  capteurs, les interprète suivant la programmation chargée sur le microcontrôleur, et envoie les ordre de commande des moteurs.</p>
         </article>
 
         <article class="bloc">
           <img class="image-equipement" src="images/driver.jpg" alt="Carte de commande moteur">
           <h3>Commande moteurs</h3>
-          <p>Elle permet de piloter les moteurs sans les brancher directement à l’ESP32.</p>
+          <p>Elle permet de piloter les moteurs sans les brancher directement à l’ESP32. Il est également possible de régler le sens de rotation de ceux-ci.</p>
         </article>
 
         <article class="bloc">
           <img class="image-equipement" src="images/moteur.jpg" alt="Motoréducteur avec encodeur">
           <h3>Motoréducteurs</h3>
-          <p>Ils entraînent les roues. Les encodeurs peuvent mesurer la rotation des roues.</p>
+          <p>Ils entraînent les roues et propulsent le robot. Les encodeurs permettent davantage de précision dans les manœuvres.</p>
         </article>
 
         <article class="bloc">
           <img class="image-equipement" src="images/roues.jpg" alt="Roues du robot">
           <h3>Roues</h3>
-          <p>Elles assurent le déplacement du robot sur la piste.</p>
+          <p>Elles assurent le déplacement, la stabilité et l'adhérence du robot sur la piste.</p>
         </article>
 
         <article class="bloc">
